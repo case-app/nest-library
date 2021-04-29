@@ -1,7 +1,7 @@
 {
-  "name": "abacus-nest-library",
-  "version": "0.0.18",
-  "description": "Abacus Nest Library",
+  "name": "@case-app/nest-library",
+  "version": "0.0.1",
+  "description": "Nest Library for CASE Framework",
   "author": "Buddyweb",
   "private": false,
   "license": "MIT",
