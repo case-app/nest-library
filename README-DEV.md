@@ -30,10 +30,10 @@ After building library :
 $ cd dist
 $ npm link // May require sudo.
 ```
-Then go to your project that has `abacus-nest-library` as dependency and it the root folder (of the Angular project) :
+Then go to your project that has `@case-app/nest-library` as dependency and it the root folder (of the NestJS project) :
 
 ```bash
-$ npm link abacus-nest-library
+$ npm link @case-app/nest-library
 ```
 
 ## Publish to npm
