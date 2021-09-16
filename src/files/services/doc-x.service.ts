@@ -1,55 +1,52 @@
-import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import * as pizZip from 'pizzip';
+import { Injectable } from '@nestjs/common'
+import * as fs from 'fs'
+import * as pizZip from 'pizzip'
 
-import { abacusConstants } from '../../abacus.constants';
+import { caseConstants } from '../../case.constants'
 
-const docXTemplater = require('docxtemplater');
+const docXTemplater = require('docxtemplater')
 
 @Injectable()
 export class DocXService {
   // Main function that generates and stores a DOC X file from a
   generateDocXFile(params: {
-    templatePath: string;
-    outputPath: string;
-    data: { [key: string]: any };
+    templatePath: string
+    outputPath: string
+    data: { [key: string]: any }
   }): string {
-    const content = fs.readFileSync(params.templatePath, 'binary');
+    const content = fs.readFileSync(params.templatePath, 'binary')
 
-    const zip = new pizZip(content);
+    const zip = new pizZip(content)
 
-    let doc;
+    let doc
     try {
-      doc = new docXTemplater(zip);
+      doc = new docXTemplater(zip)
     } catch (error) {}
 
     // set the template variables.
-    doc.setData(params.data);
+    doc.setData(params.data)
 
     try {
-      doc.render();
+      doc.render()
     } catch (error) {
-      throw Error(error);
+      throw Error(error)
     }
 
-    const buffer = doc.getZip().generate({ type: 'nodebuffer' });
-    fs.writeFileSync(
-      `${abacusConstants.storagePath}${params.outputPath}`,
-      buffer,
-    );
+    const buffer = doc.getZip().generate({ type: 'nodebuffer' })
+    fs.writeFileSync(`${caseConstants.storagePath}${params.outputPath}`, buffer)
 
-    return params.outputPath;
+    return params.outputPath
   }
 
   // Pretty hard just for a line break but no other option : https://docxtemplater.readthedocs.io/en/v3.5.1/faq.html#inserting-new-lines
   private encodeWithLineBreaks(text: string): string {
     if (!text || !text.length) {
-      return '';
+      return ''
     }
 
-    const pre = '<w:p><w:r><w:t>';
-    const post = '</w:t></w:r></w:p>';
-    const lineBreak = '<w:br/>';
+    const pre = '<w:p><w:r><w:t>'
+    const post = '</w:t></w:r></w:p>'
+    const lineBreak = '<w:br/>'
 
     return (
       pre +
@@ -60,6 +57,6 @@ export class DocXService {
         .split('\n')
         .reduce((acc: string, curr: string) => acc + lineBreak + curr, '') +
       post
-    );
+    )
   }
 }

@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { EntityTarget, getRepository } from 'typeorm'
 
-import { AbacusPermission } from '../interfaces/abacus-permission.interface'
+import { CasePermission } from '../interfaces/case-permission.interface'
 
 @Injectable()
 export class PermissionService {
   constructor(
     @Inject('PERMISSION')
-    private permissionEntity: EntityTarget<AbacusPermission>
+    private permissionEntity: EntityTarget<CasePermission>
   ) {}
 
-  index(): Promise<AbacusPermission[]> {
+  index(): Promise<CasePermission[]> {
     return getRepository(this.permissionEntity)
       .createQueryBuilder('permission')
       .getMany()

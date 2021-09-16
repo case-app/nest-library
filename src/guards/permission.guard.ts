@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthService } from '../auth/auth.service'
-import { AbacusUser } from '../resources/interfaces/abacus-user.interface'
+import { CaseUser } from '../resources/interfaces/case-user.interface'
 
 // import { AuthService } from '../../auth/auth.service'
 // import { User } from '../../resources/user/user.entity'
@@ -31,7 +31,7 @@ export class PermissionGuard implements CanActivate {
     }
 
     const req = context.switchToHttp().getRequest()
-    const user: AbacusUser = await this.authService.getUserFromToken(req)
+    const user: CaseUser = await this.authService.getUserFromToken(req)
 
     const hasPermission = () =>
       (permissions as string[]).some((permission: string) =>

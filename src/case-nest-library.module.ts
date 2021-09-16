@@ -9,23 +9,23 @@ import { ExcelService } from './files/services/excel.service'
 import { FileService } from './files/services/file.service'
 import { ImageService } from './files/services/image.service'
 import { PdfService } from './files/services/pdf.service'
-import { AbacusOptions } from './interfaces/abacus-options.interface'
+import { CaseOptions } from './interfaces/case-options.interface'
 import { NotificationModule } from './resources/notification/notification.module'
 import { PermissionModule } from './resources/permission/permission.module'
 import { RoleModule } from './resources/role/role.module'
 import { SearchController } from './resources/search/search.controller'
 import { SearchService } from './resources/search/search.service'
+import { CrudResourceService } from './resources/services/crud-resource.service'
 import { BugsnagLoggerService } from './services/bugsnag-logger.service'
 import { EmailService } from './services/email.service'
 import { HelperService } from './services/helper.service'
 import { PaginationService } from './services/pagination.service'
 import { TestService } from './test.service'
-import { CrudResourceService } from './resources/services/crud-resource.service'
 
 @Global()
 @Module({})
-export class AbacusNestLibraryModule {
-  static forRoot(options: AbacusOptions): DynamicModule {
+export class CaseNestLibraryModule {
+  static forRoot(options: CaseOptions): DynamicModule {
     const providers: Provider[] = [
       AuthService,
       TestService,
@@ -60,7 +60,7 @@ export class AbacusNestLibraryModule {
     ]
 
     return {
-      module: AbacusNestLibraryModule,
+      module: CaseNestLibraryModule,
       imports: [
         TypeOrmModule.forRoot(options.connectionOptions),
         NotificationModule,

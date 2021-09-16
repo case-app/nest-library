@@ -1,4 +1,4 @@
-export { AbacusNestLibraryModule } from './abacus-nest-library.module'
+export { CaseNestLibraryModule } from './case-nest-library.module'
 export { NotificationModule } from './resources/notification/notification.module'
 export { RoleModule } from './resources/role/role.module'
 export { PermissionModule } from './resources/permission/permission.module'
@@ -34,12 +34,12 @@ export { DecimalColumnTransformer } from './transformers/decimal-column.transfor
 export { Paginator } from './interfaces/paginator.interface'
 export { SearchResult } from './interfaces/search-result.interface'
 export { SelectOption } from './interfaces/select-option.interface'
-export { AbacusOptions } from './interfaces/abacus-options.interface'
+export { CaseOptions } from './interfaces/case-options.interface'
 
 // Resources.
-export { AbacusUser } from './resources/interfaces/abacus-user.interface'
-export { AbacusRole } from './resources/interfaces/abacus-role.interface'
-export { AbacusPermission } from './resources/interfaces/abacus-permission.interface'
+export { CaseUser } from './resources/interfaces/case-user.interface'
+export { CaseRole } from './resources/interfaces/case-role.interface'
+export { CasePermission } from './resources/interfaces/case-permission.interface'
 
 // Decorators.
 export { Permission } from './decorators/permission.decorator'

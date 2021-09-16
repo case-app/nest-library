@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import * as mkdirp from 'mkdirp'
 import * as sharp from 'sharp'
 import * as uniqId from 'uniqid'
-import { abacusConstants } from '../../abacus.constants'
+import { caseConstants } from '../../case.constants'
 
 @Injectable()
 export class ImageService {
@@ -17,31 +17,29 @@ export class ImageService {
       new Date().toLocaleString('en-us', { month: 'short' }) +
       new Date().getFullYear()
     const folder = `${kebabCaseEntityName}/${dateString}`
-    mkdirp.sync(`${abacusConstants.storagePath}/${folder}`)
+    mkdirp.sync(`${caseConstants.storagePath}/${folder}`)
 
     const name: string = uniqId()
 
     // Iterate through all entity image sizes
-    Object.keys(abacusConstants.imageSizes[entityName]).forEach(
-      (key: string) => {
-        const path = `${folder}/${name}-${key}.jpg`
-        sharp(file.buffer)
-          .jpeg({ quality: 80 })
-          .resize(
-            abacusConstants.imageSizes[entityName][key].width,
-            abacusConstants.imageSizes[entityName][key].height,
-            {
-              fit: abacusConstants.imageSizes[entityName][key].fit,
-            }
-          )
-          .toFile(
-            `${abacusConstants.storagePath}/${path}`,
-            (err: Error, info: sharp.OutputInfo) => {
-              return path
-            }
-          )
-      }
-    )
+    Object.keys(caseConstants.imageSizes[entityName]).forEach((key: string) => {
+      const path = `${folder}/${name}-${key}.jpg`
+      sharp(file.buffer)
+        .jpeg({ quality: 80 })
+        .resize(
+          caseConstants.imageSizes[entityName][key].width,
+          caseConstants.imageSizes[entityName][key].height,
+          {
+            fit: caseConstants.imageSizes[entityName][key].fit
+          }
+        )
+        .toFile(
+          `${caseConstants.storagePath}/${path}`,
+          (err: Error, info: sharp.OutputInfo) => {
+            return path
+          }
+        )
+    })
     return `${folder}/${name}`
   }
 }
