@@ -9,17 +9,17 @@ import {
 
 import { Paginator } from '../../interfaces/paginator.interface'
 import { PaginationService } from '../../services/pagination.service'
-import { AbacusPermission } from '../interfaces/abacus-permission.interface'
-import { AbacusRole } from '../interfaces/abacus-role.interface'
+import { CasePermission } from '../interfaces/case-permission.interface'
+import { CaseRole } from '../interfaces/case-role.interface'
 import { CreateUpdateRoleDto } from './dtos/create-update-role.dto'
 
 @Injectable()
 export class RoleService {
   constructor(
     @Inject('ROLE')
-    private roleEntity: EntityTarget<AbacusRole>,
+    private roleEntity: EntityTarget<CaseRole>,
     @Inject('PERMISSION')
-    private permissionEntity: EntityTarget<AbacusPermission>,
+    private permissionEntity: EntityTarget<CasePermission>,
     private readonly paginationService: PaginationService
   ) {}
 
@@ -29,7 +29,7 @@ export class RoleService {
   }: {
     page?: string
     withoutPagination?: string
-  }): Promise<Paginator<AbacusRole> | AbacusRole[]> {
+  }): Promise<Paginator<CaseRole> | CaseRole[]> {
     const query = getRepository(this.roleEntity)
       .createQueryBuilder('role')
       .loadRelationCountAndMap('role.childRelationCount', 'role.users')
@@ -46,7 +46,7 @@ export class RoleService {
     })
   }
 
-  async show(id: string): Promise<AbacusRole> {
+  async show(id: string): Promise<CaseRole> {
     const role = await getRepository(this.roleEntity)
       .createQueryBuilder('role')
       .where('role.id = :id', { id })
@@ -61,13 +61,11 @@ export class RoleService {
     return role
   }
 
-  async store(roleDto: CreateUpdateRoleDto): Promise<AbacusRole> {
-    const role: AbacusRole = await getRepository(this.roleEntity).create(
-      roleDto
-    )
+  async store(roleDto: CreateUpdateRoleDto): Promise<CaseRole> {
+    const role: CaseRole = await getRepository(this.roleEntity).create(roleDto)
 
     if (roleDto.permissionIds && roleDto.permissionIds.length) {
-      const permissions: AbacusPermission[] = await await getRepository(
+      const permissions: CasePermission[] = await await getRepository(
         this.permissionEntity
       ).findByIds(roleDto.permissionIds)
 
@@ -81,22 +79,20 @@ export class RoleService {
     id: string,
     roleDto: CreateUpdateRoleDto
   ): Promise<UpdateResult> {
-    const oldRole: AbacusRole = await await getRepository(
+    const oldRole: CaseRole = await await getRepository(
       this.roleEntity
     ).findOne(id, {
       relations: ['permissions']
     })
 
-    const role: AbacusRole = await getRepository(this.roleEntity).create(
-      roleDto
-    )
+    const role: CaseRole = await getRepository(this.roleEntity).create(roleDto)
 
     // Update relationships : Permissions
     await getConnection()
       .createQueryBuilder()
       .relation(this.roleEntity, 'permissions')
       .of(id)
-      .remove(oldRole.permissions.map((p: AbacusPermission) => p.id))
+      .remove(oldRole.permissions.map((p: CasePermission) => p.id))
 
     if (roleDto.permissionIds && roleDto.permissionIds.length) {
       await getConnection()
@@ -110,7 +106,7 @@ export class RoleService {
   }
 
   async destroy(id: string): Promise<DeleteResult> {
-    const role: AbacusRole = await await getRepository(this.roleEntity).findOne(
+    const role: CaseRole = await await getRepository(this.roleEntity).findOne(
       id
     )
     if (!role) {

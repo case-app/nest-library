@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { SelectQueryBuilder } from 'typeorm'
-import { abacusConstants } from '../abacus.constants'
+import { caseConstants } from '../case.constants'
 import { Paginator } from '../interfaces/paginator.interface'
 
 @Injectable()
@@ -8,10 +8,10 @@ export class PaginationService {
   async paginate({
     query,
     items,
-    resultsPerPage = abacusConstants.defaultResultsPerPage,
+    resultsPerPage = caseConstants.defaultResultsPerPage,
     currentPage,
     transformResult,
-    asyncTransformResult,
+    asyncTransformResult
   }: {
     query?: SelectQueryBuilder<any>
     items?: any[]
@@ -58,7 +58,7 @@ export class PaginationService {
       from: offset + 1,
       to: offset + resultsPerPage,
       total,
-      perPage: resultsPerPage,
+      perPage: resultsPerPage
     }
 
     return paginator

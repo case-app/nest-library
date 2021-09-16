@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import * as fs from 'fs'
 import * as mkdirp from 'mkdirp'
 import * as uniqId from 'uniqid'
-import { abacusConstants } from '../../abacus.constants'
+import { caseConstants } from '../../case.constants'
 
 @Injectable()
 export class FileService {
@@ -17,11 +17,11 @@ export class FileService {
       new Date().toLocaleString('en-us', { month: 'short' }) +
       new Date().getFullYear()
     const folder = `${kebabCaseEntityName}/${dateString}`
-    mkdirp.sync(`${abacusConstants.storagePath}/${folder}`)
+    mkdirp.sync(`${caseConstants.storagePath}/${folder}`)
 
     const path: string = `${folder}/${uniqId()}-${file.originalname}`
 
-    fs.writeFileSync(`${abacusConstants.storagePath}/${path}`, file.buffer)
+    fs.writeFileSync(`${caseConstants.storagePath}/${path}`, file.buffer)
 
     return path
   }

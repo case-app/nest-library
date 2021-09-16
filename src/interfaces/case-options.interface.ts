@@ -1,6 +1,6 @@
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 
-export interface AbacusOptions {
+export interface CaseOptions {
   userEntity: any
   notificationEntity: any
   permissionEntity: any

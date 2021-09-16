@@ -5,15 +5,15 @@ import {
 } from 'class-validator'
 import { EntityTarget, getConnection } from 'typeorm'
 
-import { AbacusUser } from '../resources/interfaces/abacus-user.interface'
+import { CaseUser } from '../resources/interfaces/case-user.interface'
 
 @ValidatorConstraint({ name: 'isUserAlreadyExist', async: true })
 @Injectable()
 export class IsUserAlreadyExist implements ValidatorConstraintInterface {
-  constructor(@Inject('USER') private UserEntity: EntityTarget<AbacusUser>) {}
+  constructor(@Inject('USER') private UserEntity: EntityTarget<CaseUser>) {}
 
   async validate(text: string): Promise<boolean> {
-    const user: AbacusUser = await getConnection()
+    const user: CaseUser = await getConnection()
       .getRepository(this.UserEntity)
       .createQueryBuilder('user')
       .where('user.email = :email', { email: text })

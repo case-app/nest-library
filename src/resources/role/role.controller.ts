@@ -15,7 +15,7 @@ import { CreateUpdateRoleDto } from './dtos/create-update-role.dto'
 import { DeleteResult, UpdateResult } from 'typeorm'
 import { Permission } from '../../decorators/permission.decorator'
 import { Paginator } from '../../interfaces/paginator.interface'
-import { AbacusRole } from '../interfaces/abacus-role.interface'
+import { CaseRole } from '../interfaces/case-role.interface'
 import { AuthGuard } from '../../guards/auth.guard'
 import { SelectOption } from '../../interfaces/select-option.interface'
 
@@ -27,7 +27,7 @@ export class RoleController {
   async index(
     @Query('page') page: string,
     @Query('withoutPagination') withoutPagination: string
-  ): Promise<Paginator<AbacusRole> | AbacusRole[]> {
+  ): Promise<Paginator<CaseRole> | CaseRole[]> {
     return this.roleService.index({
       page,
       withoutPagination
@@ -37,11 +37,11 @@ export class RoleController {
   @Get('select-options')
   @UseGuards(AuthGuard)
   async listSelectOptions(): Promise<SelectOption[]> {
-    const roles: AbacusRole[] = (await this.roleService.index({
+    const roles: CaseRole[] = (await this.roleService.index({
       withoutPagination: 'true'
-    })) as AbacusRole[]
+    })) as CaseRole[]
 
-    return roles.map((r: AbacusRole) => ({
+    return roles.map((r: CaseRole) => ({
       label: r.displayName,
       value: r.id.toString()
     }))
@@ -49,13 +49,13 @@ export class RoleController {
 
   @Get('/:id')
   @Permission('readRoles')
-  async show(@Param('id') id: string): Promise<AbacusRole> {
+  async show(@Param('id') id: string): Promise<CaseRole> {
     return this.roleService.show(id)
   }
 
   @Post()
   @Permission('addRoles')
-  async store(@Body() roleDto: CreateUpdateRoleDto): Promise<AbacusRole> {
+  async store(@Body() roleDto: CreateUpdateRoleDto): Promise<CaseRole> {
     return await this.roleService.store(roleDto)
   }
 

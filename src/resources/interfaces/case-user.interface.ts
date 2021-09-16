@@ -1,6 +1,6 @@
-import { AbacusRole } from './abacus-role.interface'
+import { CaseRole } from './case-role.interface'
 
-export interface AbacusUser {
+export interface CaseUser {
   id: number
   name: string
   email: string
@@ -8,5 +8,5 @@ export interface AbacusUser {
   token: string
   isActive: boolean
   lastNotificationCheck: Date
-  role: AbacusRole
+  role: CaseRole
 }

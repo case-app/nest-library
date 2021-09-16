@@ -10,13 +10,13 @@ import * as faker from 'faker'
 import { StatusCodes } from 'http-status-codes'
 
 import { EmailService } from '../services/email.service'
-import { AbacusUser } from '../resources/interfaces/abacus-user.interface'
-import { AbacusPermission } from '../resources/interfaces/abacus-permission.interface'
+import { CaseUser } from '../resources/interfaces/case-user.interface'
+import { CasePermission } from '../resources/interfaces/case-permission.interface'
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('USER') private UserEntity: EntityTarget<AbacusUser>,
+    @Inject('USER') private UserEntity: EntityTarget<CaseUser>,
     private readonly emailService: EmailService,
     private readonly connection: Connection
   ) {}
@@ -61,9 +61,7 @@ export class AuthService {
       throw new HttpException('Invalid credentials', StatusCodes.UNAUTHORIZED)
     }
     if (
-      !user.role.permissions.find(
-        (p: AbacusPermission) => p.name === 'canLogin'
-      )
+      !user.role.permissions.find((p: CasePermission) => p.name === 'canLogin')
     ) {
       throw new HttpException(
         'User not allowed to login',
@@ -74,13 +72,13 @@ export class AuthService {
     const token = jwt.sign({ email }, process.env.TOKEN_SECRET_KEY)
     return {
       accessToken: token,
-      permissions: user.role.permissions.map((p: AbacusPermission) => p.name),
+      permissions: user.role.permissions.map((p: CasePermission) => p.name),
       roleName: user.role.name,
       userId: user.id
     }
   }
 
-  async getUserFromToken(req): Promise<AbacusUser> {
+  async getUserFromToken(req): Promise<CaseUser> {
     const token =
       req.headers &&
       req.headers.authorization &&
@@ -147,7 +145,7 @@ export class AuthService {
     })
   }
 
-  hasPermission(user: AbacusUser, permission: string): boolean {
+  hasPermission(user: CaseUser, permission: string): boolean {
     return (
       user.role.permissions &&
       user.role.permissions.length &&
@@ -155,7 +153,7 @@ export class AuthService {
     )
   }
 
-  async resetPassword(newPassword: string, token: string): Promise<AbacusUser> {
+  async resetPassword(newPassword: string, token: string): Promise<CaseUser> {
     const user = await getRepository(this.UserEntity).findOne({
       token
     })

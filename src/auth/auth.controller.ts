@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Req, Get, Query } from '@nestjs/common'
-import { AbacusUser } from '../resources/interfaces/abacus-user.interface'
+import { CaseUser } from '../resources/interfaces/case-user.interface'
 
 import { AuthService } from './auth.service'
 
@@ -16,7 +16,7 @@ export class AuthController {
   }
 
   @Get('me')
-  public async getCurrentUser(@Req() req: Promise<AbacusUser>) {
+  public async getCurrentUser(@Req() req: Promise<CaseUser>) {
     return await this.authService.getUserFromToken(req)
   }
 

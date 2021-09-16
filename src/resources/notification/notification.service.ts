@@ -2,19 +2,19 @@ import { Inject, Injectable } from '@nestjs/common'
 import * as moment from 'moment'
 import { EntityManager, EntityTarget, getManager, getRepository } from 'typeorm'
 
-import { AbacusNotification } from '../interfaces/abacus-notification.interface'
-import { AbacusUser } from '../interfaces/abacus-user.interface'
+import { CaseNotification } from '../interfaces/case-notification.interface'
+import { CaseUser } from '../interfaces/case-user.interface'
 
 @Injectable()
 export class NotificationService {
   entityManager: EntityManager = getManager()
   constructor(
     @Inject('NOTIFICATION')
-    private notificationEntity: EntityTarget<AbacusNotification>
+    private notificationEntity: EntityTarget<CaseNotification>
   ) {}
 
-  async index(user: AbacusUser) {
-    const notifications: AbacusNotification[] = await getRepository(
+  async index(user: CaseUser) {
+    const notifications: CaseNotification[] = await getRepository(
       this.notificationEntity
     )
       .createQueryBuilder('notification')
@@ -24,7 +24,7 @@ export class NotificationService {
       .take(5)
       .getMany()
 
-    notifications.forEach((notification: AbacusNotification) => {
+    notifications.forEach((notification: CaseNotification) => {
       notification.isHighlighted = user.lastNotificationCheck
         ? moment(user.lastNotificationCheck).isBefore(moment(notification.date))
         : true
@@ -36,7 +36,7 @@ export class NotificationService {
     return notifications
   }
 
-  async markChecked(user: AbacusUser): Promise<Date> {
+  async markChecked(user: CaseUser): Promise<Date> {
     user.lastNotificationCheck = moment().toDate()
 
     await this.entityManager.save(user)
@@ -45,11 +45,11 @@ export class NotificationService {
   }
 
   async notify(
-    user: AbacusUser,
+    user: CaseUser,
     description: string,
     linkPath?: string
-  ): Promise<AbacusNotification> {
-    const notification: AbacusNotification = getRepository(
+  ): Promise<CaseNotification> {
+    const notification: CaseNotification = getRepository(
       this.notificationEntity
     ).create({
       description,
