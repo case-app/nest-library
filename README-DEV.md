@@ -31,7 +31,7 @@ $ cd dist
 $ npm link // May require sudo.
 ```
 
-Then go to your project that has `@case-app/nest-library` as dependency and it the root folder (of the NestJS project) :
+Then go to your CASE project and cd into the `/server` folder and then:
 
 ```bash
 $ npm link @case-app/nest-library
@@ -39,11 +39,12 @@ $ npm link @case-app/nest-library
 
 ## Publish to npm
 
+Update your version number in `package.json` and then:
+
 ```bash
-$ npm run build
-$ cd dist
-$ npm version patch
-$ npm publish
+npm run build
+cd dist
+npm publish
 ```
 
 Updating your published package version number
