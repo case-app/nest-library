@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
-const formData = require('form-data')
-const Mailgun = require('mailgun.js')
+
+import * as formData from 'form-data'
+import Mailgun from 'mailgun.js'
 
 @Injectable()
 // This Service is for MAILGUN only.
@@ -21,8 +22,7 @@ export class EmailService {
     const mailgun = new Mailgun(formData)
     const mg = mailgun.client({
       username: 'buddyweb',
-      key: process.env.MAILGUN_API_KEY,
-      domain: process.env.MAILGUN_DOMAIN
+      key: process.env.MAILGUN_API_KEY
     })
 
     return mg.messages

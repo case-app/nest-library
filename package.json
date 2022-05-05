@@ -1,6 +1,6 @@
 {
   "name": "@case-app/nest-library",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nest Library for CASE Framework",
   "author": "Buddyweb",
   "private": false,
@@ -38,7 +38,7 @@
     "puppeteer": "^8.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.6.3",
+    "rxjs": "^7.5.5",
     "sharp": "^0.28.1",
     "tslint": "^6.1.3",
     "typeorm": "^0.2.32",
