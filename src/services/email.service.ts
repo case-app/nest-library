@@ -1,15 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import * as mailgun from 'mailgun-js'
+const formData = require('form-data')
+const Mailgun = require('mailgun.js')
 
 @Injectable()
-// This Service is for MAILGUN only
+// This Service is for MAILGUN only.
 export class EmailService {
-  // Credentials must be specified in ENV file to send emails
-  private mailgun = mailgun({
-    apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN
-  })
-
   send({
     to,
     bcc,
@@ -21,15 +16,26 @@ export class EmailService {
     bcc?: string
     subject: string
     html: string
-    attachments?: mailgun.Attachment[]
-  }): Promise<mailgun.messages.SendResponse> {
-    return this.mailgun.messages().send({
-      from: process.env.MAIL_FROM,
-      to: process.env.EMAIL_MODE !== 'debug' ? to : process.env.DEBUG_MAIL_TO,
-      bcc: process.env.EMAIL_MODE !== 'debug' ? bcc : process.env.DEBUG_MAIL_TO,
-      subject,
-      html,
-      attachment: attachments
+    attachments?: any
+  }): Promise<any> {
+    const mailgun = new Mailgun(formData)
+    const mg = mailgun.client({
+      username: 'buddyweb',
+      key: process.env.MAILGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMAIN
     })
+
+    return mg.messages
+      .create(process.env.MAILGUN_DOMAIN, {
+        from: process.env.MAIL_FROM,
+        to: process.env.EMAIL_MODE !== 'debug' ? to : process.env.DEBUG_MAIL_TO,
+        bcc:
+          process.env.EMAIL_MODE !== 'debug' ? bcc : process.env.DEBUG_MAIL_TO,
+        subject,
+        html,
+        attachment: attachments
+      })
+      .then((msg) => console.log(msg)) // logs response data
+      .catch((err) => console.log(err)) // logs any error
   }
 }

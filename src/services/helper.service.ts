@@ -22,4 +22,8 @@ export class HelperService {
       Date.UTC(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10))
     ).toISOString()
   }
+
+  static uniqueArrayOfObjects(array: any[], key: string): any[] {
+    return [...new Map(array.map((item) => [item[key], item])).values()]
+  }
 }
