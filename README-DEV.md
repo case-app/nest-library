@@ -47,7 +47,8 @@ cd dist
 npm publish
 ```
 
-Updating your published package version number
+### Updating your published package version number
+
 To change the version number in package.json, on the command line, in the package root directory, run the following command, replacing <update_type> with one of the semantic versioning release types (patch, major, or minor):
 Run npm publish.
 
