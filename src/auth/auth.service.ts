@@ -29,6 +29,7 @@ export class AuthService {
     permissions: string[]
     roleName: string
     userId: number
+    homepagePath: string
   }> {
     if (!email) {
       throw new HttpException(
@@ -74,6 +75,7 @@ export class AuthService {
       accessToken: token,
       permissions: user.role.permissions.map((p: CasePermission) => p.name),
       roleName: user.role.name,
+      homepagePath: user.role.homepagePath,
       userId: user.id
     }
   }

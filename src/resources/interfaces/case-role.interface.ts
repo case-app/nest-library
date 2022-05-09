@@ -5,6 +5,7 @@ export interface CaseRole {
   id: number
   name: string
   displayName: string
+  homepagePath: string
   permissions: CasePermission[]
   users: CaseUser[]
 }
