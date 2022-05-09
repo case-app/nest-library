@@ -11,7 +11,12 @@ export class AuthController {
   public async getToken(
     @Body('email') email,
     @Body('password') password
-  ): Promise<{ accessToken: string; permissions: string[]; roleName: string }> {
+  ): Promise<{
+    accessToken: string
+    permissions: string[]
+    roleName: string
+    homepagePath: string
+  }> {
     return await this.authService.createToken(email, password)
   }
 
