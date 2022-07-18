@@ -7,7 +7,8 @@ import {
   Param,
   Body,
   Query,
-  UseGuards
+  UseGuards,
+  ParseIntPipe
 } from '@nestjs/common'
 import { RoleService } from './role.service'
 
@@ -22,6 +23,7 @@ import { SelectOption } from '../../interfaces/select-option.interface'
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
+
   @Get()
   @Permission('browseRoles')
   async index(
@@ -49,28 +51,28 @@ export class RoleController {
 
   @Get('/:id')
   @Permission('readRoles')
-  async show(@Param('id') id: string): Promise<CaseRole> {
+  async show(@Param('id', ParseIntPipe) id: number): Promise<CaseRole> {
     return this.roleService.show(id)
   }
 
   @Post()
   @Permission('addRoles')
   async store(@Body() roleDto: CreateUpdateRoleDto): Promise<CaseRole> {
-    return await this.roleService.store(roleDto)
+    return this.roleService.store(roleDto)
   }
 
   @Put('/:id')
   @Permission('editRoles')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() roleDto: CreateUpdateRoleDto
   ): Promise<UpdateResult> {
-    return await this.roleService.update(id, roleDto)
+    return this.roleService.update(id, roleDto)
   }
 
   @Delete('/:id')
   @Permission('deleteRoles')
-  async delete(@Param() id: string): Promise<DeleteResult> {
-    return await this.roleService.destroy(id)
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<DeleteResult> {
+    return this.roleService.destroy(id)
   }
 }

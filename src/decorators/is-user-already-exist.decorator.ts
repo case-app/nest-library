@@ -3,17 +3,20 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface
 } from 'class-validator'
-import { EntityTarget, getConnection } from 'typeorm'
+import { DataSource, EntityTarget } from 'typeorm'
 
 import { CaseUser } from '../resources/interfaces/case-user.interface'
 
 @ValidatorConstraint({ name: 'isUserAlreadyExist', async: true })
 @Injectable()
 export class IsUserAlreadyExist implements ValidatorConstraintInterface {
-  constructor(@Inject('USER') private UserEntity: EntityTarget<CaseUser>) {}
+  constructor(
+    @Inject('USER') private UserEntity: EntityTarget<CaseUser>,
+    private dataSource: DataSource
+  ) {}
 
   async validate(text: string): Promise<boolean> {
-    const user: CaseUser = await getConnection()
+    const user: CaseUser = await this.dataSource
       .getRepository(this.UserEntity)
       .createQueryBuilder('user')
       .where('user.email = :email', { email: text })

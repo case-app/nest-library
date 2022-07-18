@@ -1,5 +1,5 @@
 import { HttpException, Injectable, Inject } from '@nestjs/common'
-import { Connection, EntityTarget, getRepository } from 'typeorm'
+import { Connection, DataSource, EntityTarget } from 'typeorm'
 
 import * as jwt from 'jsonwebtoken'
 import * as CryptoJs from 'crypto-js'
@@ -12,14 +12,20 @@ import { StatusCodes } from 'http-status-codes'
 import { EmailService } from '../services/email.service'
 import { CaseUser } from '../resources/interfaces/case-user.interface'
 import { CasePermission } from '../resources/interfaces/case-permission.interface'
+import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 
 @Injectable()
 export class AuthService {
+  connection: Connection
+
   constructor(
     @Inject('USER') private UserEntity: EntityTarget<CaseUser>,
     private readonly emailService: EmailService,
-    private readonly connection: Connection
-  ) {}
+    @Inject('CONNECTION_OPTIONS')
+    private connectionOptions: MysqlConnectionOptions
+  ) {
+    this.connection = new DataSource(this.connectionOptions)
+  }
 
   async createToken(
     email: string,
@@ -43,21 +49,17 @@ export class AuthService {
         StatusCodes.UNPROCESSABLE_ENTITY
       )
     }
-    const user = await getRepository(this.UserEntity).findOne(
-      {
+    const user = await this.connection.getRepository(this.UserEntity).findOne({
+      where: {
         email,
         password: CryptoJs.SHA3(password).toString()
       },
-      {
-        join: {
-          alias: 'user',
-          leftJoinAndSelect: {
-            role: 'user.role',
-            permissions: 'role.permissions'
-          }
+      relations: {
+        role: {
+          permissions: true
         }
       }
-    )
+    })
     if (!user || !user.isActive) {
       throw new HttpException('Invalid credentials', StatusCodes.UNAUTHORIZED)
     }
@@ -118,7 +120,8 @@ export class AuthService {
   }
 
   async sendResetPasswordEmail(email: string): Promise<any> {
-    const user = await getRepository(this.UserEntity)
+    const user = await this.connection
+      .getRepository(this.UserEntity)
       .createQueryBuilder('user')
       .where('email = :email', { email })
       .addSelect('user.token')
@@ -137,7 +140,7 @@ export class AuthService {
     )
     const template = Handlebars.compile(source)
 
-    return await this.emailService.send({
+    return this.emailService.send({
       to: user.email,
       subject: `Réinitialisation de votre mot de passe`,
       html: template({
@@ -156,8 +159,10 @@ export class AuthService {
   }
 
   async resetPassword(newPassword: string, token: string): Promise<CaseUser> {
-    const user = await getRepository(this.UserEntity).findOne({
-      token
+    const user = await this.connection.getRepository(this.UserEntity).findOne({
+      where: {
+        token
+      }
     })
     if (!user) {
       throw new HttpException(
@@ -168,6 +173,6 @@ export class AuthService {
     user.password = SHA3(newPassword).toString()
     // Reset token
     user.token = faker.random.alphaNumeric(20)
-    return await getRepository(this.UserEntity).save(user)
+    return this.connection.getRepository(this.UserEntity).save(user)
   }
 }

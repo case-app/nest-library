@@ -11,11 +11,13 @@ export class NotificationController {
     private readonly notificationService: NotificationService,
     private readonly authService: AuthService
   ) {}
+
   @Get('/')
   async index(@Req() req: any): Promise<CaseNotification[]> {
     const currentUser: CaseUser = await this.authService.getUserFromToken(req)
     return this.notificationService.index(currentUser)
   }
+
   @Patch('/mark-checked')
   async markChecked(@Req() req: any): Promise<Date> {
     const currentUser: CaseUser = await this.authService.getUserFromToken(req)

@@ -1,3 +1,4 @@
+import { Reflector } from '@nestjs/core'
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 
 export interface CaseOptions {
@@ -7,4 +8,5 @@ export interface CaseOptions {
   roleEntity: any
 
   connectionOptions: MysqlConnectionOptions
+  reflector: Reflector
 }

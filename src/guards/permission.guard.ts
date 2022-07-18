@@ -1,18 +1,20 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable
+} from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthService } from '../auth/auth.service'
 import { CaseUser } from '../resources/interfaces/case-user.interface'
-
-// import { AuthService } from '../../auth/auth.service'
-// import { User } from '../../resources/user/user.entity'
 
 // We are using BREAD (Browse, Read, Edit, Add, Delete) style for Permissions inspired by Laravel Voyager
 // https://voyager-docs.devdojo.com/core-concepts/roles-and-permissions
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
-    private readonly reflector: Reflector,
-    private readonly authService: AuthService
+    @Inject('REFLECTOR') private reflector: Reflector,
+    private authService: AuthService
   ) {}
 
   // Checks if Request User has Permission. If array passed as param, User only needs to have one of those Permissions.

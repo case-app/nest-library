@@ -17,17 +17,17 @@ export class AuthController {
     roleName: string
     homepagePath: string
   }> {
-    return await this.authService.createToken(email, password)
+    return this.authService.createToken(email, password)
   }
 
   @Get('me')
   public async getCurrentUser(@Req() req: Promise<CaseUser>) {
-    return await this.authService.getUserFromToken(req)
+    return this.authService.getUserFromToken(req)
   }
 
   @Get('forgot-password')
   public async forgotPassword(@Query('email') email: string): Promise<any> {
-    return await this.authService.sendResetPasswordEmail(email)
+    return this.authService.sendResetPasswordEmail(email)
   }
 
   @Post('reset-password')
@@ -35,6 +35,6 @@ export class AuthController {
     @Body('newPassword') newPassword: string,
     @Body('token') token: string
   ) {
-    return await this.authService.resetPassword(newPassword, token)
+    return this.authService.resetPassword(newPassword, token)
   }
 }

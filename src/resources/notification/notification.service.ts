@@ -1,22 +1,29 @@
 import { Inject, Injectable } from '@nestjs/common'
 import * as moment from 'moment'
-import { EntityManager, EntityTarget, getManager, getRepository } from 'typeorm'
+import { Connection, DataSource, EntityTarget, getRepository } from 'typeorm'
+import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 
 import { CaseNotification } from '../interfaces/case-notification.interface'
 import { CaseUser } from '../interfaces/case-user.interface'
 
 @Injectable()
 export class NotificationService {
-  entityManager: EntityManager = getManager()
+  connection: Connection
+
   constructor(
     @Inject('NOTIFICATION')
-    private notificationEntity: EntityTarget<CaseNotification>
-  ) {}
+    private notificationEntity: EntityTarget<CaseNotification>,
+    @Inject('USER')
+    private userEntity: EntityTarget<CaseUser>,
+    @Inject('CONNECTION_OPTIONS')
+    private connectionOptions: MysqlConnectionOptions
+  ) {
+    this.connection = new DataSource(this.connectionOptions)
+  }
 
   async index(user: CaseUser) {
-    const notifications: CaseNotification[] = await getRepository(
-      this.notificationEntity
-    )
+    const notifications: CaseNotification[] = await this.connection
+      .getRepository(this.notificationEntity)
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.user', 'user')
       .where('user.id = :userId', { userId: user.id })
@@ -39,7 +46,7 @@ export class NotificationService {
   async markChecked(user: CaseUser): Promise<Date> {
     user.lastNotificationCheck = moment().toDate()
 
-    await this.entityManager.save(user)
+    await this.connection.getRepository(this.userEntity).save(user)
 
     return user.lastNotificationCheck
   }
@@ -57,6 +64,8 @@ export class NotificationService {
       linkPath: linkPath || null,
       date: moment().toDate()
     })
-    return await getRepository(this.notificationEntity).save(notification)
+    return this.connection
+      .getRepository(this.notificationEntity)
+      .save(notification)
   }
 }

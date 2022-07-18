@@ -1,8 +1,6 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common'
-import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { AuthController } from './auth/auth.controller'
-import { AuthService } from './auth/auth.service'
+import { AuthModule } from './auth/auth.module'
 import { UploadController } from './files/controllers/upload.controller'
 import { DocXService } from './files/services/doc-x.service'
 import { ExcelService } from './files/services/excel.service'
@@ -19,11 +17,12 @@ import { HelperService } from './services/helper.service'
 import { PaginationService } from './services/pagination.service'
 
 @Global()
-@Module({})
+@Module({
+  imports: [AuthModule]
+})
 export class CaseNestLibraryModule {
   static forRoot(options: CaseOptions): DynamicModule {
     const providers: Provider[] = [
-      AuthService,
       ExcelService,
       DocXService,
       ExcelService,
@@ -49,20 +48,23 @@ export class CaseNestLibraryModule {
       {
         provide: 'ROLE',
         useValue: options.roleEntity
+      },
+      {
+        provide: 'CONNECTION_OPTIONS',
+        useValue: options.connectionOptions
+      },
+      {
+        provide: 'REFLECTOR',
+        useValue: options.reflector
       }
     ]
 
     return {
       module: CaseNestLibraryModule,
-      imports: [
-        TypeOrmModule.forRoot(options.connectionOptions),
-        NotificationModule,
-        RoleModule,
-        PermissionModule
-      ],
+      imports: [NotificationModule, RoleModule, PermissionModule],
       providers: providers,
       exports: providers,
-      controllers: [UploadController, AuthController]
+      controllers: [UploadController]
     }
   }
 }
