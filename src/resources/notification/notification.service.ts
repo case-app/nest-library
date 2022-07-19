@@ -1,29 +1,28 @@
 import { Inject, Injectable } from '@nestjs/common'
 import * as moment from 'moment'
-import { Connection, DataSource, EntityTarget, getRepository } from 'typeorm'
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
+import { DataSource, EntityTarget, getRepository, Repository } from 'typeorm'
 
 import { CaseNotification } from '../interfaces/case-notification.interface'
 import { CaseUser } from '../interfaces/case-user.interface'
 
 @Injectable()
 export class NotificationService {
-  connection: Connection
+  notificationRepository: Repository<CaseNotification>
 
   constructor(
     @Inject('NOTIFICATION')
-    private notificationEntity: EntityTarget<CaseNotification>,
+    notificationEntity: EntityTarget<CaseNotification>,
     @Inject('USER')
     private userEntity: EntityTarget<CaseUser>,
-    @Inject('CONNECTION_OPTIONS')
-    private connectionOptions: MysqlConnectionOptions
+    @Inject('DATA_SOURCE')
+    private dataSource: DataSource
   ) {
-    this.connection = new DataSource(this.connectionOptions)
+    this.notificationRepository =
+      this.dataSource.getRepository(notificationEntity)
   }
 
   async index(user: CaseUser) {
-    const notifications: CaseNotification[] = await this.connection
-      .getRepository(this.notificationEntity)
+    const notifications: CaseNotification[] = await this.notificationRepository
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.user', 'user')
       .where('user.id = :userId', { userId: user.id })
@@ -46,7 +45,7 @@ export class NotificationService {
   async markChecked(user: CaseUser): Promise<Date> {
     user.lastNotificationCheck = moment().toDate()
 
-    await this.connection.getRepository(this.userEntity).save(user)
+    await this.dataSource.getRepository(this.userEntity).save(user)
 
     return user.lastNotificationCheck
   }
@@ -56,16 +55,12 @@ export class NotificationService {
     description: string,
     linkPath?: string
   ): Promise<CaseNotification> {
-    const notification: CaseNotification = getRepository(
-      this.notificationEntity
-    ).create({
+    const notification: CaseNotification = this.notificationRepository.create({
       description,
       user,
       linkPath: linkPath || null,
       date: moment().toDate()
     })
-    return this.connection
-      .getRepository(this.notificationEntity)
-      .save(notification)
+    return this.notificationRepository.save(notification)
   }
 }

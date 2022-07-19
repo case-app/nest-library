@@ -1,26 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { Connection, DataSource, EntityTarget, getRepository } from 'typeorm'
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
+import { DataSource, EntityTarget, Repository } from 'typeorm'
 
 import { CasePermission } from '../interfaces/case-permission.interface'
 
 @Injectable()
 export class PermissionService {
-  connection: Connection
+  permissionRepository: Repository<CasePermission>
 
   constructor(
     @Inject('PERMISSION')
-    private permissionEntity: EntityTarget<CasePermission>,
-    @Inject('CONNECTION_OPTIONS')
-    private connectionOptions: MysqlConnectionOptions
+    permissionEntity: EntityTarget<CasePermission>,
+    @Inject('DATA_SOURCE')
+    dataSource: DataSource
   ) {
-    this.connection = new DataSource(this.connectionOptions)
+    this.permissionRepository = dataSource.getRepository(permissionEntity)
   }
 
   index(): Promise<CasePermission[]> {
-    return this.connection
-      .getRepository(this.permissionEntity)
-      .createQueryBuilder('permission')
-      .getMany()
+    return this.permissionRepository.createQueryBuilder('permission').getMany()
   }
 }

@@ -1,6 +1,9 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { DataSource } from 'typeorm'
 
 import { AuthModule } from './auth/auth.module'
+import { AuthService } from './auth/auth.service'
 import { UploadController } from './files/controllers/upload.controller'
 import { DocXService } from './files/services/doc-x.service'
 import { ExcelService } from './files/services/excel.service'
@@ -33,6 +36,7 @@ export class CaseNestLibraryModule {
       ImageService,
       EmailService,
       BugsnagLoggerService,
+      AuthService,
       {
         provide: 'USER',
         useValue: options.userEntity
@@ -50,18 +54,38 @@ export class CaseNestLibraryModule {
         useValue: options.roleEntity
       },
       {
-        provide: 'CONNECTION_OPTIONS',
-        useValue: options.connectionOptions
-      },
-      {
         provide: 'REFLECTOR',
         useValue: options.reflector
+      },
+
+      {
+        provide: 'DATA_SOURCE',
+        useFactory: async () => {
+          const dataSource = new DataSource({
+            type: options.connectionOptions.type,
+            host: options.connectionOptions.host,
+            port: options.connectionOptions.port,
+            username: options.connectionOptions.username,
+            password: options.connectionOptions.password,
+            database: options.connectionOptions.database,
+            entities: [
+              options.roleEntity,
+              options.userEntity,
+              options.roleEntity,
+              options.permissionEntity,
+              options.notificationEntity
+            ],
+            synchronize: false
+          })
+
+          return dataSource.initialize()
+        }
       }
     ]
 
     return {
       module: CaseNestLibraryModule,
-      imports: [NotificationModule, RoleModule, PermissionModule],
+      imports: [NotificationModule, RoleModule, PermissionModule, AuthModule],
       providers: providers,
       exports: providers,
       controllers: [UploadController]

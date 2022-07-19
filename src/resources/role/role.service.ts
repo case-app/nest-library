@@ -1,12 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import {
-  Connection,
   DataSource,
   DeleteResult,
   EntityTarget,
+  Repository,
   UpdateResult
 } from 'typeorm'
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 
 import { Paginator } from '../../interfaces/paginator.interface'
 import { PaginationService } from '../../services/pagination.service'
@@ -16,7 +15,7 @@ import { CreateUpdateRoleDto } from './dtos/create-update-role.dto'
 
 @Injectable()
 export class RoleService {
-  connection: Connection
+  roleRepository: Repository<CaseRole>
 
   constructor(
     @Inject('ROLE')
@@ -24,10 +23,10 @@ export class RoleService {
     @Inject('PERMISSION')
     private permissionEntity: EntityTarget<CasePermission>,
     private readonly paginationService: PaginationService,
-    @Inject('CONNECTION_OPTIONS')
-    private connectionOptions: MysqlConnectionOptions
+    @Inject('DATA_SOURCE')
+    private dataSource: DataSource
   ) {
-    this.connection = new DataSource(this.connectionOptions)
+    this.roleRepository = this.dataSource.getRepository(roleEntity)
   }
 
   async index({
@@ -37,8 +36,7 @@ export class RoleService {
     page?: string
     withoutPagination?: string
   }): Promise<Paginator<CaseRole> | CaseRole[]> {
-    const query = this.connection
-      .getRepository(this.roleEntity)
+    const query = this.roleRepository
       .createQueryBuilder('role')
       .loadRelationCountAndMap('role.childRelationCount', 'role.users')
       .orderBy('role.name', 'ASC')
@@ -55,8 +53,7 @@ export class RoleService {
   }
 
   async show(id: number): Promise<CaseRole> {
-    const role = await this.connection
-      .getRepository(this.roleEntity)
+    const role = await this.roleRepository
       .createQueryBuilder('role')
       .where('role.id = :id', { id })
       .loadRelationCountAndMap('role.childRelationCount', 'role.users')
@@ -71,63 +68,55 @@ export class RoleService {
   }
 
   async store(roleDto: CreateUpdateRoleDto): Promise<CaseRole> {
-    const role: CaseRole = await this.connection
-      .getRepository(this.roleEntity)
-      .create(roleDto)
+    const role: CaseRole = await this.roleRepository.create(roleDto)
 
     if (roleDto.permissionIds && roleDto.permissionIds.length) {
-      const permissions: CasePermission[] = await this.connection
+      const permissions: CasePermission[] = await this.dataSource
         .getRepository(this.permissionEntity)
         .findByIds(roleDto.permissionIds)
 
       role.permissions = permissions
     }
 
-    return this.connection.getRepository(this.roleEntity).save(role)
+    return this.roleRepository.save(role)
   }
 
   async update(
     id: number,
     roleDto: CreateUpdateRoleDto
   ): Promise<UpdateResult> {
-    const oldRole: CaseRole = await this.connection
-      .getRepository(this.roleEntity)
-      .findOneOrFail({
-        where: {
-          id: id
-        },
-        relations: {
-          permissions: true
-        }
-      })
+    const oldRole: CaseRole = await this.roleRepository.findOneOrFail({
+      where: {
+        id: id
+      },
+      relations: {
+        permissions: true
+      }
+    })
 
-    const role: CaseRole = await this.connection
-      .getRepository(this.roleEntity)
-      .create(roleDto)
+    const role: CaseRole = await this.roleRepository.create(roleDto)
 
     // Update relationships : Permissions
-    await this.connection
+    await this.dataSource
       .createQueryBuilder()
       .relation(this.roleEntity, 'permissions')
       .of(id)
       .remove(oldRole.permissions.map((p: CasePermission) => p.id))
 
     if (roleDto.permissionIds && roleDto.permissionIds.length) {
-      await this.connection
+      await this.dataSource
         .createQueryBuilder()
         .relation(this.roleEntity, 'permissions')
         .of(id)
         .add(roleDto.permissionIds)
     }
 
-    return this.connection.getRepository(this.roleEntity).update(id, role)
+    return this.roleRepository.update(id, role)
   }
 
   async destroy(id: number): Promise<DeleteResult> {
-    const role: CaseRole = await this.connection
-      .getRepository(this.roleEntity)
-      .findOneByOrFail({ id })
+    const role: CaseRole = await this.roleRepository.findOneByOrFail({ id })
 
-    return this.connection.getRepository(this.roleEntity).delete(role.id)
+    return this.roleRepository.delete(role.id)
   }
 }

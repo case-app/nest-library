@@ -1,7 +1,4 @@
 export { CaseNestLibraryModule } from './case-nest-library.module'
-export { NotificationModule } from './resources/notification/notification.module'
-export { RoleModule } from './resources/role/role.module'
-export { PermissionModule } from './resources/permission/permission.module'
 
 // Database
 export {

@@ -1,5 +1,5 @@
 import { HttpException, Injectable, Inject } from '@nestjs/common'
-import { Connection, DataSource, EntityTarget } from 'typeorm'
+import { DataSource, EntityTarget, Repository } from 'typeorm'
 
 import * as jwt from 'jsonwebtoken'
 import * as CryptoJs from 'crypto-js'
@@ -12,19 +12,18 @@ import { StatusCodes } from 'http-status-codes'
 import { EmailService } from '../services/email.service'
 import { CaseUser } from '../resources/interfaces/case-user.interface'
 import { CasePermission } from '../resources/interfaces/case-permission.interface'
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 
 @Injectable()
 export class AuthService {
-  connection: Connection
+  userRepository: Repository<CaseUser>
 
   constructor(
     @Inject('USER') private UserEntity: EntityTarget<CaseUser>,
     private readonly emailService: EmailService,
-    @Inject('CONNECTION_OPTIONS')
-    private connectionOptions: MysqlConnectionOptions
+    @Inject('DATA_SOURCE')
+    private dataSource: DataSource
   ) {
-    this.connection = new DataSource(this.connectionOptions)
+    this.userRepository = this.dataSource.getRepository(this.UserEntity)
   }
 
   async createToken(
@@ -49,7 +48,7 @@ export class AuthService {
         StatusCodes.UNPROCESSABLE_ENTITY
       )
     }
-    const user = await this.connection.getRepository(this.UserEntity).findOne({
+    const user = await this.userRepository.findOne({
       where: {
         email,
         password: CryptoJs.SHA3(password).toString()
@@ -92,8 +91,7 @@ export class AuthService {
       process.env.TOKEN_SECRET_KEY,
       async (err, decoded) => {
         if (decoded) {
-          const user: any = this.connection
-            .getRepository(this.UserEntity)
+          const user: any = this.userRepository
             .createQueryBuilder('user')
             .where('user.email = :email', { email: decoded.email })
             .leftJoinAndSelect('user.role', 'role')
@@ -120,8 +118,7 @@ export class AuthService {
   }
 
   async sendResetPasswordEmail(email: string): Promise<any> {
-    const user = await this.connection
-      .getRepository(this.UserEntity)
+    const user = await this.userRepository
       .createQueryBuilder('user')
       .where('email = :email', { email })
       .addSelect('user.token')
@@ -159,7 +156,7 @@ export class AuthService {
   }
 
   async resetPassword(newPassword: string, token: string): Promise<CaseUser> {
-    const user = await this.connection.getRepository(this.UserEntity).findOne({
+    const user = await this.userRepository.findOne({
       where: {
         token
       }
@@ -173,6 +170,6 @@ export class AuthService {
     user.password = SHA3(newPassword).toString()
     // Reset token
     user.token = faker.random.alphaNumeric(20)
-    return this.connection.getRepository(this.UserEntity).save(user)
+    return this.userRepository.save(user)
   }
 }
