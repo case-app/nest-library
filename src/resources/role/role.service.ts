@@ -53,18 +53,12 @@ export class RoleService {
   }
 
   async show(id: number): Promise<CaseRole> {
-    const role = await this.roleRepository
+    return this.roleRepository
       .createQueryBuilder('role')
       .where('role.id = :id', { id })
       .loadRelationCountAndMap('role.childRelationCount', 'role.users')
       .leftJoinAndSelect('role.permissions', 'permission')
-      .getOne()
-
-    if (!role) {
-      throw new NotFoundException()
-    }
-
-    return role
+      .getOneOrFail()
   }
 
   async store(roleDto: CreateUpdateRoleDto): Promise<CaseRole> {

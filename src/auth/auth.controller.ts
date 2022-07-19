@@ -1,6 +1,16 @@
-import { Controller, Post, Body, Req, Get, Query } from '@nestjs/common'
-import { CaseUser } from '../resources/interfaces/case-user.interface'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Post,
+  Query,
+  Req,
+  Res
+} from '@nestjs/common'
+import { Request, Response } from 'express'
 
+import { CaseUser } from '../resources/interfaces/case-user.interface'
 import { AuthService } from './auth.service'
 
 @Controller('auth')
@@ -10,31 +20,39 @@ export class AuthController {
   @Post('login')
   public async getToken(
     @Body('email') email,
-    @Body('password') password
-  ): Promise<{
-    accessToken: string
-    permissions: string[]
-    roleName: string
-    homepagePath: string
-  }> {
-    return this.authService.createToken(email, password)
+    @Body('password') password,
+    @Res() res: Response
+  ): Promise<
+    | {
+        accessToken: string
+        permissions: string[]
+        roleName: string
+        homepagePath: string
+      }
+    | Response<HttpException>
+  > {
+    return this.authService.createToken(email, password, res)
   }
 
   @Get('me')
-  public async getCurrentUser(@Req() req: Promise<CaseUser>) {
-    return this.authService.getUserFromToken(req)
+  public async getCurrentUser(@Req() req: Request, @Res() res: Response) {
+    const user: CaseUser = await this.authService.getUserFromToken(req, res)
   }
 
   @Get('forgot-password')
-  public async forgotPassword(@Query('email') email: string): Promise<any> {
-    return this.authService.sendResetPasswordEmail(email)
+  public async forgotPassword(
+    @Query('email') email: string,
+    @Res() res: Response
+  ): Promise<any> {
+    return this.authService.sendResetPasswordEmail(email, res)
   }
 
   @Post('reset-password')
   public async resetPassword(
     @Body('newPassword') newPassword: string,
-    @Body('token') token: string
+    @Body('token') token: string,
+    @Res() res: Response
   ) {
-    return this.authService.resetPassword(newPassword, token)
+    return this.authService.resetPassword(newPassword, token, res)
   }
 }

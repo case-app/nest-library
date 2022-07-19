@@ -12,6 +12,7 @@ import { StatusCodes } from 'http-status-codes'
 import { EmailService } from '../services/email.service'
 import { CaseUser } from '../resources/interfaces/case-user.interface'
 import { CasePermission } from '../resources/interfaces/case-permission.interface'
+import { Request, Response } from 'express'
 
 @Injectable()
 export class AuthService {
@@ -28,25 +29,37 @@ export class AuthService {
 
   async createToken(
     email: string,
-    password: string
-  ): Promise<{
-    accessToken: string
-    permissions: string[]
-    roleName: string
-    userId: number
-    homepagePath: string
-  }> {
+    password: string,
+    res: Response
+  ): Promise<
+    | {
+        accessToken: string
+        permissions: string[]
+        roleName: string
+        userId: number
+        homepagePath: string
+      }
+    | Response<HttpException>
+  > {
     if (!email) {
-      throw new HttpException(
-        'Email is required',
-        StatusCodes.UNPROCESSABLE_ENTITY
-      )
+      return res
+        .status(StatusCodes.UNPROCESSABLE_ENTITY)
+        .send(
+          new HttpException(
+            'Email is required',
+            StatusCodes.UNPROCESSABLE_ENTITY
+          )
+        )
     }
     if (!password) {
-      throw new HttpException(
-        'Password is required',
-        StatusCodes.UNPROCESSABLE_ENTITY
-      )
+      return res
+        .status(StatusCodes.UNPROCESSABLE_ENTITY)
+        .send(
+          new HttpException(
+            'Password is required',
+            StatusCodes.UNPROCESSABLE_ENTITY
+          )
+        )
     }
     const user = await this.userRepository.findOne({
       where: {
@@ -60,7 +73,11 @@ export class AuthService {
       }
     })
     if (!user || !user.isActive) {
-      throw new HttpException('Invalid credentials', StatusCodes.UNAUTHORIZED)
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(
+          new HttpException('Invalid credentials', StatusCodes.UNAUTHORIZED)
+        )
     }
     if (
       !user.role.permissions.find((p: CasePermission) => p.name === 'canLogin')
@@ -81,7 +98,7 @@ export class AuthService {
     }
   }
 
-  async getUserFromToken(req): Promise<CaseUser> {
+  async getUserFromToken(req: Request, res: Response): Promise<CaseUser> {
     const token =
       req.headers &&
       req.headers.authorization &&
@@ -100,24 +117,32 @@ export class AuthService {
             .getOne()
 
           if (!user) {
-            throw new HttpException(
-              'Cannot find JWT user in database.',
-              StatusCodes.FORBIDDEN
-            )
+            return res
+              .status(StatusCodes.FORBIDDEN)
+              .send(
+                new HttpException(
+                  'Cannot find JWT user in database.',
+                  StatusCodes.FORBIDDEN
+                )
+              )
           }
 
           return user
         } else {
-          throw new HttpException(
-            'Only logged in users can see this content.',
-            StatusCodes.FORBIDDEN
-          )
+          return res
+            .status(StatusCodes.FORBIDDEN)
+            .send(
+              new HttpException(
+                'Only logged in users can see this content.',
+                StatusCodes.FORBIDDEN
+              )
+            )
         }
       }
     )
   }
 
-  async sendResetPasswordEmail(email: string): Promise<any> {
+  async sendResetPasswordEmail(email: string, res: Response): Promise<any> {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .where('email = :email', { email })
@@ -125,10 +150,14 @@ export class AuthService {
       .getOne()
 
     if (!user) {
-      throw new HttpException(
-        'This User does not exist in our database',
-        StatusCodes.UNAUTHORIZED
-      )
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(
+          new HttpException(
+            'This User does not exist in our database',
+            StatusCodes.UNAUTHORIZED
+          )
+        )
     }
 
     const source = fs.readFileSync(
@@ -155,17 +184,25 @@ export class AuthService {
     )
   }
 
-  async resetPassword(newPassword: string, token: string): Promise<CaseUser> {
+  async resetPassword(
+    newPassword: string,
+    token: string,
+    res: Response
+  ): Promise<CaseUser | Response<HttpException>> {
     const user = await this.userRepository.findOne({
       where: {
         token
       }
     })
     if (!user) {
-      throw new HttpException(
-        'This User does not exist in our database',
-        StatusCodes.UNAUTHORIZED
-      )
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(
+          new HttpException(
+            'This User does not exist in our database',
+            StatusCodes.UNAUTHORIZED
+          )
+        )
     }
     user.password = SHA3(newPassword).toString()
     // Reset token

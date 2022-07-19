@@ -1,4 +1,5 @@
-import { Controller, Get, Patch, Req } from '@nestjs/common'
+import { Controller, Get, Patch, Req, Res } from '@nestjs/common'
+import { Request, Response } from 'express'
 
 import { AuthService } from '../../auth/auth.service'
 import { CaseNotification } from '../interfaces/case-notification.interface'
@@ -13,14 +14,23 @@ export class NotificationController {
   ) {}
 
   @Get('/')
-  async index(@Req() req: any): Promise<CaseNotification[]> {
-    const currentUser: CaseUser = await this.authService.getUserFromToken(req)
+  async index(
+    @Req() req: Request,
+    @Res() res: Response
+  ): Promise<CaseNotification[]> {
+    const currentUser: CaseUser = await this.authService.getUserFromToken(
+      req,
+      res
+    )
     return this.notificationService.index(currentUser)
   }
 
   @Patch('/mark-checked')
-  async markChecked(@Req() req: any): Promise<Date> {
-    const currentUser: CaseUser = await this.authService.getUserFromToken(req)
+  async markChecked(@Req() req: Request, @Res() res: Response): Promise<Date> {
+    const currentUser: CaseUser = await this.authService.getUserFromToken(
+      req,
+      res
+    )
     return this.notificationService.markChecked(currentUser)
   }
 }
